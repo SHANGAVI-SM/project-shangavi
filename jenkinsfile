@@ -1,63 +1,61 @@
 pipeline {
+    
     agent any
 
+     environment {
+        DEV_REPO_URL = 'https://github.com/SHANGAVI-SM/project-shangavi.git'
+        MASTER_REPO_URL = 'https://github.com/rvsp/reactjs-demo.git'
+        dockerHubRegistry = 'docker.io'
+        devdockerHubRepository = 'shangavism/dev'
+        prodDockerHubRepository = 'shangavism/prod'
+        dockerImageName = 'capstoneimage'
+        dockerImageTag = 'latest'
+    }
+
     stages {
-        stage('Checkout') {
+        stage('Checkout Dev Repo') {
             steps {
-                // Checkout the source code from the Git repository
-                script {
-                    sh 'git checkout dev'
-                    sh 'git pull origin dev'
-                }
+                // Clone the "dev repo"
+                checkout([$class: 'GitSCM', branches: [[name: '*/dev']], doGenerateSubmoduleConfigurations: false, extensions: [], userRemoteConfigs: [[url: DEV_REPO_URL]]])
             }
         }
-
-        stage('Build and Push to dev repo') {
+        stage('Build and Push Dev Docker Image') {
             when {
-                expression { currentBuild.rawBuild.getChangeSets().size() > 0 }
+                changeset '**'
             }
             steps {
                 script {
-                    // Define variables for Docker image information
-                    def dockerImageName = 'capstoneimage'
-                    def dockerImageTag = 'latest'
-                    def dockerHubRegistry = 'docker.io'
-                    def dockerHubRepository = 'shangavism/dev'
-
-                    // Build and tag the Docker image
-                    sh "docker build -t ${dockerImageName}:${dockerImageTag} ."
+                   
+                    // Execute your custom build.sh script
+                    sh './build.sh'
 
                     // Log in to Docker Hub (you may need to provide credentials)
                     withCredentials([usernamePassword(credentialsId: 'your-docker-hub-credentials', usernameVariable: 'DOCKER_HUB_USERNAME', passwordVariable: 'DOCKER_HUB_PASSWORD')]) {
-                        sh "docker login -u $DOCKER_HUB_USERNAME -p $DOCKER_HUB_PASSWORD"
-                    }
+                    sh "docker login -u $DOCKER_HUB_USERNAME -p $DOCKER_HUB_PASSWORD"
 
-                    // Push the Docker image to the development repository on Docker Hub
-                    sh "docker tag ${dockerImageName}:${dockerImageTag} ${dockerHubRegistry}/${dockerHubRepository}:${dockerImageTag}"
-                    sh "docker push ${dockerHubRegistry}/${dockerHubRepository}:${dockerImageTag}"
+                     // Push the Docker image to the development repository on Docker Hub
+                    sh "docker tag ${dockerImageName}:${dockerImageTag} ${dockerHubRegistry}/${devdockerHubRepository}:${dockerImageTag}"
+                    sh "docker push ${dockerHubRegistry}/${devdockerHubRepository}:${dockerImageTag}"
                 }
             }
         }
-
-        stage('Push to Prod Repo') {
+        stage('Build and Push Prod Docker Image') {
             when {
-                expression { currentBuild.rawBuild.getChangeSets().size() > 0 }
+                changeset 'refs/heads/dev:refs/heads/master'
             }
             steps {
                 script {
-                    // Define variables for the production Docker image
-                    def prodDockerImageTag = 'prod'
-                    def prodDockerHubRepository = 'shangavism/prod'
-                   
-                    // Checkout the 'master' branch
-                    sh 'git checkout master'
-                    sh 'git pull origin master'
+                    
+                    // Clone the "master repo"
+                    checkout([$class: 'GitSCM', branches: [[name: '*/master']], doGenerateSubmoduleConfigurations: false, extensions: [], userRemoteConfigs: [[url: MASTER_REPO_URL]]])
 
-                    // Tag the Docker image for production
+                    // Execute your custom build.sh script for the "master" branch
+                    sh './build.sh'
+
+                    // Build the Docker image for the "master" branch
                     sh "docker tag ${dockerImageName}:${dockerImageTag} ${dockerHubRegistry}/${prodDockerHubRepository}:${prodDockerImageTag}"
-
-                    // Push the Docker image to the production repository on Docker Hub
-                    sh "docker push ${dockerHubRegistry}/${prodDockerHubRepository}:${prodDockerImageTag}"
+                    sh "docker push ${dockerHubRegistry}/${prodDockerHubRepository}:${DockerImageTag}"
+                    
                 }
             }
         }
@@ -68,12 +66,13 @@ pipeline {
                     def awsEC2InstanceIP = '43.205.110.72'
             
                     // Pull the Docker image from the production repository on Docker Hub
-                    sh "docker pull ${dockerHubRegistry}/${prodDockerHubRepository}:${prodDockerImageTag}"
+                    sh "docker pull ${dockerHubRegistry}/${prodDockerHubRepository}:${DockerImageTag}"
 
                     // Deploy the application to your AWS server
-                    sh "docker run -d -p 80:80 --name my-app ${dockerHubRegistry}/${prodDockerHubRepository}:${prodDockerImageTag}"
+                    sh "docker run -d -p 80:80 --name shangavi-app ${dockerHubRegistry}/${prodDockerHubRepository}:${prodDockerImageTag}"
                 }
             }
         }
+    }
     }
 }

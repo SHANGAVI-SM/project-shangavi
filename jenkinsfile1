@@ -1,0 +1,58 @@
+pipeline {
+    agent any
+
+    environment {
+        DEV_REPO_URL = 'https://github.com/your-dev-repo.git'
+        MASTER_REPO_URL = 'https://github.com/your-master-repo.git'
+        DEV_REGISTRY = 'your-dev-registry-url'
+        PROD_REGISTRY = 'your-prod-registry-url'
+        DEV_IMAGE = 'your-dev-image-name'
+        PROD_IMAGE = 'your-prod-image-name'
+    }
+
+    stages {
+        stage('Checkout Dev Repo') {
+            steps {
+                // Clone the "dev repo"
+                checkout([$class: 'GitSCM', branches: [[name: '*/dev']], doGenerateSubmoduleConfigurations: false, extensions: [], userRemoteConfigs: [[url: DEV_REPO_URL]]])
+            }
+        }
+
+        stage('Build and Push Dev Docker Image') {
+            when {
+                changeset '**'
+            }
+            steps {
+                script {
+                    // Execute your custom build.sh script
+                    sh './build.sh'
+
+                    // Build the Docker image for the "dev" branch
+                    sh "docker build -t $DEV_REGISTRY/$DEV_IMAGE ."
+                    sh "docker push $DEV_REGISTRY/$DEV_IMAGE"
+                }
+            }
+        }
+
+        stage('Build and Push Prod Docker Image') {
+            when {
+                changeset 'refs/heads/dev:refs/heads/master'
+            }
+            steps {
+                script {
+                    // Clone the "master repo"
+                    checkout([$class: 'GitSCM', branches: [[name: '*/master']], doGenerateSubmoduleConfigurations: false, extensions: [], userRemoteConfigs: [[url: MASTER_REPO_URL]]])
+
+                    // Execute your custom build.sh script for the "master" branch
+                    sh './build.sh'
+
+                    // Build the Docker image for the "master" branch
+                    sh "docker build -t $PROD_REGISTRY/$PROD_IMAGE ."
+                    sh "docker push $PROD_REGISTRY/$PROD_IMAGE"
+                }
+            }
+        }
+
+        // Add more stages as needed for deployment, publishing, etc.
+    }
+}
