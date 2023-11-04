@@ -21,9 +21,11 @@ pipeline {
         stage('Build and Push Dev Docker Image') {
             steps {
                 script {
+                    nodejs('nodejs14') {
                     sh 'npm install'
                     sh 'npm audit fix --force'
                     sh 'npm run build'
+                    }                 
                     sh "chmod +x -R ${env.WORKSPACE}"
                     sh './build.sh'
                     withCredentials([usernamePassword(credentialsId: 'your-docker-hub-credentials', usernameVariable: 'DOCKER_HUB_USERNAME', passwordVariable: 'DOCKER_HUB_PASSWORD')]) {
