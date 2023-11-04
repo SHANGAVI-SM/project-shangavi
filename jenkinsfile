@@ -19,9 +19,6 @@ pipeline {
             }
         }
         stage('Build and Push Dev Docker Image') {
-            when {
-                changeset '**'
-            }
             steps {
                 script {
                     sh './build.sh'
