@@ -5,9 +5,9 @@ dockerImageName="capstone-image"
 dockerImageTag="latest"
 
 # Build the React application
-npm install
-npm audit fix --force
-npm run build
+#npm install
+#npm audit fix --force
+#npm run build
 
 # Create a Docker image
 docker build -t $dockerImageName:$dockerImageTag .
