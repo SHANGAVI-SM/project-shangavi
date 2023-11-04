@@ -1,8 +1,7 @@
 pipeline {
-    
     agent any
 
-     environment {
+    environment {
         DEV_REPO_URL = 'https://github.com/SHANGAVI-SM/project-shangavi.git'
         MASTER_REPO_URL = 'https://github.com/rvsp/reactjs-demo.git'
         dockerHubRegistry = 'docker.io'
@@ -10,12 +9,12 @@ pipeline {
         prodDockerHubRepository = 'shangavism/prod'
         dockerImageName = 'capstoneimage'
         dockerImageTag = 'latest'
+        awsEC2InstanceIP = '43.205.110.72'
     }
 
     stages {
         stage('Checkout Dev Repo') {
             steps {
-                // Clone the "dev repo"
                 checkout([$class: 'GitSCM', branches: [[name: '*/dev']], doGenerateSubmoduleConfigurations: false, extensions: [], userRemoteConfigs: [[url: DEV_REPO_URL]]])
             }
         }
@@ -25,17 +24,12 @@ pipeline {
             }
             steps {
                 script {
-                   
-                    // Execute your custom build.sh script
                     sh './build.sh'
-
-                    // Log in to Docker Hub (you may need to provide credentials)
                     withCredentials([usernamePassword(credentialsId: 'your-docker-hub-credentials', usernameVariable: 'DOCKER_HUB_USERNAME', passwordVariable: 'DOCKER_HUB_PASSWORD')]) {
-                    sh "docker login -u $DOCKER_HUB_USERNAME -p $DOCKER_HUB_PASSWORD"
-
-                     // Push the Docker image to the development repository on Docker Hub
-                    sh "docker tag ${dockerImageName}:${dockerImageTag} ${dockerHubRegistry}/${devdockerHubRepository}:${dockerImageTag}"
-                    sh "docker push ${dockerHubRegistry}/${devdockerHubRepository}:${dockerImageTag}"
+                        sh "docker login -u $DOCKER_HUB_USERNAME -p $DOCKER_HUB_PASSWORD"
+                        sh "docker tag ${dockerImageName}:${dockerImageTag} ${dockerHubRegistry}/${devdockerHubRepository}:${dockerImageTag}"
+                        sh "docker push ${dockerHubRegistry}/${devdockerHubRepository}:${dockerImageTag}"
+                    }
                 }
             }
         }
@@ -45,34 +39,20 @@ pipeline {
             }
             steps {
                 script {
-                    
-                    // Clone the "master repo"
-                    checkout([$class: 'GitSCM', branches: [[name: '*/master']], doGenerateSubmoduleConfigurations: false, extensions: [], userRemoteConfigs: [[url: MASTER_REPO_URL]]])
-
-                    // Execute your custom build.sh script for the "master" branch
+                    checkout([$class: 'GitSCM', branches: [[name: '*/master']], doGenerateSubmoduleConfigurations: false, extensions: [], userRemoteConfigs: [[url: MASTER_REPO_URL]])
                     sh './build.sh'
-
-                    // Build the Docker image for the "master" branch
-                    sh "docker tag ${dockerImageName}:${dockerImageTag} ${dockerHubRegistry}/${prodDockerHubRepository}:${prodDockerImageTag}"
-                    sh "docker push ${dockerHubRegistry}/${prodDockerHubRepository}:${DockerImageTag}"
-                    
+                    sh "docker tag ${dockerImageName}:${dockerImageTag} ${dockerHubRegistry}/${prodDockerHubRepository}:${dockerImageTag}"
+                    sh "docker push ${dockerHubRegistry}/${prodDockerHubRepository}:${dockerImageTag}"
                 }
             }
         }
-        stage('deploy the application' ) {
+        stage('Deploy the application') {
             steps {
                 script {
-                    // define variable for deploying the application         
-                    def awsEC2InstanceIP = '43.205.110.72'
-            
-                    // Pull the Docker image from the production repository on Docker Hub
-                    sh "docker pull ${dockerHubRegistry}/${prodDockerHubRepository}:${DockerImageTag}"
-
-                    // Deploy the application to your AWS server
-                    sh "docker run -d -p 80:80 --name shangavi-app ${dockerHubRegistry}/${prodDockerHubRepository}:${prodDockerImageTag}"
+                    sh "docker pull ${dockerHubRegistry}/${prodDockerHubRepository}:${dockerImageTag}"
+                    sh "docker run -d -p 80:80 --name shangavi-app ${dockerHubRegistry}/${prodDockerHubRepository}:${dockerImageTag} -e SERVER_IP=$awsEC2InstanceIP"
                 }
             }
         }
-    }
     }
 }
