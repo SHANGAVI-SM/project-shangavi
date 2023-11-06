@@ -29,7 +29,7 @@ pipeline {
                     //sh './build.sh'
                     withCredentials([usernamePassword(credentialsId: 'your-docker-hub-credentials', usernameVariable: 'DOCKER_HUB_USERNAME', passwordVariable: 'DOCKER_HUB_PASSWORD')]) {
                         sh "docker login -u $DOCKER_HUB_USERNAME -p $DOCKER_HUB_PASSWORD"
-                        docker build -t $dockerImageName:$dockerImageTag .
+                        sh "docker build -t $(dockerImageName):$(dockerImageTag) ."
                         sh "docker tag ${dockerImageName}:${dockerImageTag} ${dockerHubRegistry}/${devdockerHubRepository}:${dockerImageTag}"
                         sh "docker push ${dockerHubRegistry}/${devdockerHubRepository}:${dockerImageTag}"
                     }
