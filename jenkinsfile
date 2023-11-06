@@ -23,6 +23,7 @@ pipeline {
                 script {
                     nodejs('nodejs14') {
                     sh 'npm ci'
+                    sh 'npx browserslist@latest --update-db'
                     sh 'npm run build'
                     }                 
                     //sh "chmod +x -R ${env.WORKSPACE}"
