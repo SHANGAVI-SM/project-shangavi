@@ -22,7 +22,7 @@ pipeline {
             steps {
                 script {
                     nodejs('nodejs14') {
-                    sh 'npm install'
+                    sh 'npm ci'
                     sh 'npm audit fix --force'
                     sh 'npm run build'
                     }                 
