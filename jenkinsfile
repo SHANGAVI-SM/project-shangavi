@@ -7,7 +7,7 @@ pipeline {
         dockerHubRegistry = 'docker.io'
         devdockerHubRepository = 'shangavism/dev'
         prodDockerHubRepository = 'shangavism/prod'
-        dockerImageName = 'capstoneimage'
+        dockerImageName = 'capstone-image'
         dockerImageTag = 'latest'
         awsEC2InstanceIP = '43.205.110.72'
     }
@@ -39,6 +39,7 @@ pipeline {
                 script {
                     checkout([$class: 'GitSCM', branches: [[name: '*/master']], doGenerateSubmoduleConfigurations: false, extensions: [], userRemoteConfigs: [[url: MASTER_REPO_URL]]])
                     sh './build.sh'
+                    sh "docker tag ${dockerImageName}:${dockerImageTag} ${dockerHubRegistry}/${prodDockerHubRepository}:${dockerImageTag}"
                     sh "docker push ${dockerHubRegistry}/${prodDockerHubRepository}:${dockerImageTag}"
                 }
             }
