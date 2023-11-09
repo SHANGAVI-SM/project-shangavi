@@ -4,8 +4,8 @@ FROM node:14-alpine
 # Set the working directory in the container
 WORKDIR /app
 
-# Copy package.json and yarn.lock to the container
-COPY package.json yarn.lock ./
+# Copy the package.json to the container
+COPY package.json .
 
 # Install project dependencies using Yarn
 RUN yarn install
@@ -17,7 +17,8 @@ COPY . .
 RUN yarn build
 
 # Expose a port, if needed (for development server or custom server)
-EXPOSE 80
+# EXPOSE 3000
 
 # Start the application (this is just an example, adjust as needed)
 CMD ["yarn", "start"]
+
