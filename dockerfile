@@ -17,7 +17,7 @@ COPY . .
 RUN yarn build
 
 # Expose a port, if needed (for development server or custom server)
-# EXPOSE 3000
+EXPOSE 80
 
 # Start the application (this is just an example, adjust as needed)
 CMD ["yarn", "start"]
