@@ -47,8 +47,8 @@ pipeline {
         stage('Deploy the application') {
             steps {
                 script {
-                    sh "docker pull ${dockerHubRegistry}/${prodDockerHubRepository}:${dockerImageTag}"
-                    sh "docker run -d -p 80:80 --name shangavi-app ${dockerHubRegistry}/${prodDockerHubRepository}:${dockerImageTag} -e SERVER_IP=$awsEC2InstanceIP"
+                    sh "docker pull ${dockerHubRegistry}/${DockerHubRepository}:${dockerImageTag}"
+                    sh "docker run -d -p 80:80 --name shangavi-app ${dockerHubRegistry}/${DockerHubRepository}:${dockerImageTag} -e SERVER_IP=$awsEC2InstanceIP"
                 }
             }
         }
