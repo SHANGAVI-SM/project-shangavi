@@ -39,7 +39,6 @@ pipeline {
                 script {
                     checkout([$class: 'GitSCM', branches: [[name: '*/master']], doGenerateSubmoduleConfigurations: false, extensions: [], userRemoteConfigs: [[url: MASTER_REPO_URL]]])
                     sh './build.sh'
-                    sh "docker tag ${dockerImageName}:${dockerImageTag} ${dockerHubRegistry}/${prodDockerHubRepository}:${dockerImageTag}"
                     sh "docker push ${dockerHubRegistry}/${prodDockerHubRepository}:${dockerImageTag}"
                 }
             }
