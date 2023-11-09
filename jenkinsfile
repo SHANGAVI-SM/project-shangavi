@@ -9,7 +9,7 @@ pipeline {
         prodDockerHubRepository = 'shangavism/prod'
         dockerImageName = 'capstone-image'
         dockerImageTag = 'latest'
-        awsEC2InstanceIP = '43.205.110.72'
+        awsEC2InstanceIP = '65.0.133.87'
     }
 
     stages {
@@ -38,6 +38,7 @@ pipeline {
             steps {
                 script {
                     checkout([$class: 'GitSCM', branches: [[name: '*/master']], doGenerateSubmoduleConfigurations: false, extensions: [], userRemoteConfigs: [[url: MASTER_REPO_URL]]])
+                    sh "chmod +x -R ${env.WORKSPACE}"
                     sh './build.sh'
                     sh "docker tag ${dockerImageName}:${dockerImageTag} ${dockerHubRegistry}/${prodDockerHubRepository}:${dockerImageTag}"
                     sh "docker push ${dockerHubRegistry}/${prodDockerHubRepository}:${dockerImageTag}"
@@ -47,8 +48,8 @@ pipeline {
         stage('Deploy the application') {
             steps {
                 script {
-                    sh "docker pull ${dockerHubRegistry}/${DockerHubRepository}:${dockerImageTag}"
-                    sh "docker run -d -p 80:80 --name shangavi-app ${dockerHubRegistry}/${DockerHubRepository}:${dockerImageTag} -e SERVER_IP=$awsEC2InstanceIP"
+                    sh "chmod +x -R ${env.WORKSPACE}"
+                    sh './deploy1.sh'
                 }
             }
         }
