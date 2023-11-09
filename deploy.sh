@@ -5,7 +5,7 @@ IMAGE_NAME="capstone-image"
 TAG="latest"
 
 # Define the container name
-CONTAINER_NAME="capstone_container"
+CONTAINER_NAME="shangavi"
 
 # Define the port mappings (host_port:container_port)
 PORT_MAPPING="80:8080"

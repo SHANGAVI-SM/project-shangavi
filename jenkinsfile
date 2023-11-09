@@ -9,7 +9,6 @@ pipeline {
         prodDockerHubRepository = 'shangavism/prod'
         dockerImageName = 'capstone-image'
         dockerImageTag = 'latest'
-        awsEC2InstanceIP = '65.0.133.87'
     }
 
     stages {
