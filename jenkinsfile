@@ -13,6 +13,9 @@ pipeline {
 
     stages {
         stage('Checkout Dev Repo') {
+            when {
+                changeset '**'
+            }
             steps {
                 checkout([$class: 'GitSCM', branches: [[name: '*/dev']], doGenerateSubmoduleConfigurations: false, extensions: [], userRemoteConfigs: [[url: DEV_REPO_URL]]])
             }
