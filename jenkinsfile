@@ -49,8 +49,21 @@ pipeline {
             steps {
                 script {
                     
-                    sh "chmod +x -R ${env.WORKSPACE}"
-                    sh './deploy.sh'
+                    def  AWS_REGION = 'ap-south-1'
+                    def AWS_ACCESS_KEY_ID = credentials('awsconsole')
+                    def AWS_SECRET_ACCESS_KEY = credentials('aws-key')
+                    def DOCKER_IMAGE_NAME = 'your_docker_image_name'
+                    def EC2_INSTANCE_IP = '15.206.94.151'
+                    def EC2_INSTANCE_USERNAME = 'application server'
+                    def EC2_INSTANCE_SSH_KEY = credentials('deploymentseerver-privatekey')
+    
+                    sshagent(['your_ec2_instance_ssh_key']) {
+                        sh "ssh -o StrictHostKeyChecking=no -i $EC2_INSTANCE_SSH_KEY $EC2_INSTANCE_USERNAME@$EC2_INSTANCE_IP 'docker pull $dockerImageName:$dockerImageTag'"
+                        sh "ssh -o StrictHostKeyChecking=no -i $EC2_INSTANCE_SSH_KEY $EC2_INSTANCE_USERNAME@$EC2_INSTANCE_IP 'docker stop shangavi || true && docker rm shangavi || true'"
+                        sh "ssh -o StrictHostKeyChecking=no -i $EC2_INSTANCE_SSH_KEY $EC2_INSTANCE_USERNAME@$EC2_INSTANCE_IP 'docker run -d --name shangavi -p 80:80 $dockerImageName:$dockerImageTag'"
+                    //sh "chmod +x -R ${env.WORKSPACE}"
+                    // sh './deploy.sh'
+                    }
                 }
             }
         }
