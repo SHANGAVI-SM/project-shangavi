@@ -1,24 +1,36 @@
 #!/bin/bash
 
-# Define the Docker image name and tag
-IMAGE_NAME="capstone-image"
-TAG="latest"
+# AWS EC2 Instance Details
+INSTANCE_USER="ubuntu"
+INSTANCE_IP="15.206.94.151"
+INSTANCE_SSH_KEY="/c/Users/koushalya/Downloads/keyforall.pem"
 
-# Define the container name
-CONTAINER_NAME="shangavi"
+# Docker Image Details
+dockerImageName="capstone-image"
+dockerImageTag="latest"
+DOCKER_CONTAINER_NAME="shangavi"
 
-# Define the port mappings (host_port:container_port)
-PORT_MAPPING="80:8080"
 
-# Define any environment variables
-ENV_VARS="-e DB_HOST=mydbhost -e DB_USER=mydbuser"
+# Connect to EC2 instance
+ssh -i "$INSTANCE_SSH_KEY" "$INSTANCE_USER"@"$INSTANCE_IP" << EOF
 
-# Stop and remove any existing container with the same name
-docker stop $CONTAINER_NAME
-docker rm $CONTAINER_NAME
+sudo apt-get update 
 
-# Run the Docker container
-docker run -d --name $CONTAINER_NAME -p $PORT_MAPPING $ENV_VARS $IMAGE_NAME:$TAG
+# Pull the latest Docker image
+docker pull "$dockerImageName":"$dockerImageTag"
 
-# Optional: View the container logs
-docker logs $CONTAINER_NAME
+# Stop and remove the existing container (if any)
+
+  docker stop $DOCKER_CONTAINER_NAME
+  docker rm $DOCKER_CONTAINER_NAME
+
+# Run the new Docker container
+docker run -d --name "$DOCKER_CONTAINER_NAME" -p 80:80 "$dockerImageName":"$dockerImageTag"
+
+# Clean up unused Docker images and containers
+docker image prune -f
+docker container prune -f
+
+EOF
+
+echo "Deployment completed successfully."
