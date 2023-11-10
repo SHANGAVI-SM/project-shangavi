@@ -1,32 +1,30 @@
 #!/bin/bash
 
-# Configuration
-EC2_INSTANCE_IP="13.233.247.178"   
-DOCKER_IMAGE_NAME="capstone-image"    
-DOCKER_CONTAINER_NAME="shangavi"    
-DOCKER_PORT_MAPPING="-p 80:80" 
-YOUR_KEY_PAIR="keyforall"
-      
-# SSH into the EC2 instance and update it
-ssh -i "$YOUR_KEY_PAIR.pem" ec2-user@$EC2_INSTANCE_IP << EOF
-  sudo apt-get update -y
-EOF
+# Define variables
+dockerImageName="capstone-image"
+dockerImageTag="latest"
+CONTAINER_NAME="shangavi"
+AWS_REGION="your-aws-region"
+AWS_ACCESS_KEY="your-aws-access-key"
+AWS_SECRET_KEY="your-aws-secret-key"
 
-# Pull the latest Docker image from your Docker registry
-ssh -i "$YOUR_KEY_PAIR.pem" ec2-user@$EC2_INSTANCE_IP << EOF
-  docker pull $DOCKER_IMAGE_NAME
-EOF
+# Log in to your Docker registry (if needed)
+# docker login -u your-docker-username -p your-docker-password
 
-# Stop and remove the existing Docker container (if it exists)
-ssh -i "$YOUR_KEY_PAIR.pem" ec2-user@$EC2_INSTANCE_IP << EOF
+# Pull the latest Docker image
+docker pull "$dockerImageName":"$dockerImageTag"
 
-  docker stop $DOCKER_CONTAINER_NAME
-  docker rm $DOCKER_CONTAINER_NAME
-EOF
+# Stop the existing container (if running)
+if docker ps | grep -q $CONTAINER_NAME; then
+  docker stop $CONTAINER_NAME
+  docker rm $CONTAINER_NAME
+fi
 
-# Run the new Docker container
-ssh -i "$YOUR_KEY_PAIR.pem" ec2-user@$EC2_INSTANCE_IP << EOF
-  docker run -d --name $DOCKER_CONTAINER_NAME $DOCKER_PORT_MAPPING $DOCKER_IMAGE_NAME
-EOF
+# Run the new container
+docker run -d --name $CONTAINER_NAME -p 80:80 "$dockerImageName":"$dockerImageTag"
 
-echo "Deployment completed."
+# Clean up unused Docker images and containers
+docker system prune -af
+
+
+echo "Deployment completed successfully."
