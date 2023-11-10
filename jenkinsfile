@@ -47,19 +47,16 @@ pipeline {
         }
         stage('Deploy the application') {
             steps {
-                script {
-                    
+                script {  
                     def AWS_REGION = 'ap-south-1'
                     def AWS_ACCESS_KEY_ID = credentials('awsconsole')
                     def AWS_SECRET_ACCESS_KEY = credentials('aws-key')
                     def EC2_INSTANCE_IP = '15.206.94.151'
-                    def EC2_INSTANCE_USERNAME = 'ubuntu'
                     def EC2_INSTANCE_SSH_KEY = credentials('key-private')
     
-                    sshagent(['$EC2_INSTANCE_SSH_KEY']) {
-                        sh "ssh -o StrictHostKeyChecking=no -i $EC2_INSTANCE_SSH_KEY $EC2_INSTANCE_USERNAME@$EC2_INSTANCE_IP 'docker pull $dockerImageName:$dockerImageTag'"
-                        sh "ssh -o StrictHostKeyChecking=no -i $EC2_INSTANCE_SSH_KEY $EC2_INSTANCE_USERNAME@$EC2_INSTANCE_IP 'docker stop shangavi || true && docker rm shangavi || true'"
-                        sh "ssh -o StrictHostKeyChecking=no -i $EC2_INSTANCE_SSH_KEY $EC2_INSTANCE_USERNAME@$EC2_INSTANCE_IP 'docker run -d --name shangavi -p 80:80 $dockerImageName:$dockerImageTag'"
+                    withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', accessKeyVariable: 'AWS_ACCESS_KEY_ID', secretKeyVariable: 'AWS_SECRET_ACCESS_KEY']]) {
+                        sh "ssh -o StrictHostKeyChecking=no ubuntu@${EC2_INSTANCE_IP} 'docker pull ${dockerHubRegistry}/${devDockerHubRepository}:${dockerImageTag} && docker run -d -p 80:80 ${dockerHubRegistry}/${devDockerHubRepository}:${dockerImageTag}'"
+                    
                     //sh "chmod +x -R ${env.WORKSPACE}"
                     // sh './deploy.sh'
                     }
