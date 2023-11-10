@@ -48,12 +48,12 @@ pipeline {
         stage('Deploy the application') {
             steps {
                 script {
-                     withCredentials([[
+                     withCredentials([
                         $class: 'AmazonWebServicesCredentialsBinding',
                         accessKeyVariable: 'awsconsole',
                         secretKeyVariable: 'aws-key',
                         credentialsId: 'your-aws-credentials-id'
-                    ]]) 
+                    ]) 
                     sh "chmod +x -R ${env.WORKSPACE}"
                     sh './deploy.sh'
                 }
