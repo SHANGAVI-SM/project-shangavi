@@ -52,10 +52,9 @@ pipeline {
                     def AWS_REGION = 'ap-south-1'
                     def AWS_ACCESS_KEY_ID = credentials('awsconsole')
                     def AWS_SECRET_ACCESS_KEY = credentials('aws-key')
-                    def DOCKER_IMAGE_NAME = 'your_docker_image_name'
                     def EC2_INSTANCE_IP = '15.206.94.151'
-                    def EC2_INSTANCE_USERNAME = 'application server'
-                    def EC2_INSTANCE_SSH_KEY = credentials('deploymentseerver-privatekey')
+                    def EC2_INSTANCE_USERNAME = 'ubuntu'
+                    def EC2_INSTANCE_SSH_KEY = credentials('key-private')
     
                     sshagent(['$EC2_INSTANCE_SSH_KEY']) {
                         sh "ssh -o StrictHostKeyChecking=no -i $EC2_INSTANCE_SSH_KEY $EC2_INSTANCE_USERNAME@$EC2_INSTANCE_IP 'docker pull $dockerImageName:$dockerImageTag'"
