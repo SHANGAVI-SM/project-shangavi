@@ -12,7 +12,7 @@ DOCKER_CONTAINER_NAME="shangavi"
 
 
 # Connect to EC2 instance
-ssh -i "$INSTANCE_SSH_KEY" "$INSTANCE_USER"@"$INSTANCE_IP" << EOF
+ssh -o StrictHostKeyChecking=no -i "$INSTANCE_SSH_KEY" "$INSTANCE_USER"@"$INSTANCE_IP" << EOF
 
 sudo apt-get update 
 

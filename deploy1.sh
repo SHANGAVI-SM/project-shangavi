@@ -4,9 +4,9 @@
 dockerImageName="capstone-image"
 dockerImageTag="latest"
 CONTAINER_NAME="shangavi"
-AWS_REGION="your-aws-region"
-AWS_ACCESS_KEY="your-aws-access-key"
-AWS_SECRET_KEY="your-aws-secret-key"
+AWS_REGION="ap-south-1"
+AWS_ACCESS_KEY="awsconsole"
+AWS_SECRET_KEY="aws-key"
 
 # Log in to your Docker registry (if needed)
 # docker login -u your-docker-username -p your-docker-password
