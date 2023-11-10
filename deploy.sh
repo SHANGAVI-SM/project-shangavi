@@ -3,7 +3,7 @@
 # AWS EC2 Instance Details
 INSTANCE_USER="ubuntu"
 INSTANCE_IP="15.206.94.151"
-INSTANCE_SSH_KEY="/c/Users/koushalya/Downloads/keyforall.pem"
+INSTANCE_SSH_KEY=credentials('key-private')
 
 # Docker Image Details
 dockerImageName="capstone-image"

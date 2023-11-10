@@ -48,20 +48,13 @@ pipeline {
         stage('Deploy the application') {
             steps {
                 script {  
-                    def AWS_REGION = 'ap-south-1'
-                    def AWS_ACCESS_KEY_ID = credentials('awsconsole')
-                    def AWS_SECRET_ACCESS_KEY = credentials('aws-key')
-                    def EC2_INSTANCE_IP = '15.206.94.151'
-                    def EC2_INSTANCE_SSH_KEY = credentials('key-private')
-    
-                    withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', accessKeyVariable: 'AWS_ACCESS_KEY_ID', secretKeyVariable: 'AWS_SECRET_ACCESS_KEY']]) {
-                        sh "ssh -o StrictHostKeyChecking=no ubuntu@${EC2_INSTANCE_IP} 'docker pull ${dockerHubRegistry}/${devDockerHubRepository}:${dockerImageTag} && docker run -d -p 80:80 ${dockerHubRegistry}/${devDockerHubRepository}:${dockerImageTag}'"
                     
-                    //sh "chmod +x -R ${env.WORKSPACE}"
-                    // sh './deploy.sh'
-                    }
+                    sh "chmod +x -R ${env.WORKSPACE}"
+                    sh './deploy.sh'
                 }
             }
         }
     }
 }
+
+
