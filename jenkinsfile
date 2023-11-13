@@ -13,13 +13,16 @@ pipeline {
 
     stages {
         stage('Checkout Dev Repo') {
-    
-            steps {
+                steps {
                 checkout([$class: 'GitSCM', branches: [[name: '*/dev']], doGenerateSubmoduleConfigurations: false, extensions: [], userRemoteConfigs: [[url: DEV_REPO_URL]]])
             }
         }
+
         stage('Build and Push Dev Docker Image') {
             steps {
+                when {
+                changeset 'changeset**'
+                }
                 script {
                     sh "chmod +x -R ${env.WORKSPACE}"
                     sh './build.sh'
@@ -31,6 +34,7 @@ pipeline {
                 }
             }
         }
+        
         stage('Build and Push Prod Docker Image') {
             when {
                 changeset 'refs/heads/dev:refs/heads/master'
