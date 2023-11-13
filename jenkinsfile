@@ -48,7 +48,8 @@ pipeline {
                     sh "docker login -u $DOCKER_HUB_USERNAME -p $DOCKER_HUB_PASSWORD"
                     sh "docker tag ${dockerImageName}:${dockerImageTag} ${dockerHubRegistry}/${prodDockerHubRepository}:${dockerImageTag}"
                     sh "docker push ${dockerHubRegistry}/${prodDockerHubRepository}:${dockerImageTag}"
-                }
+                    }
+                 }
             }
         }
         stage('Deploy the application') {
