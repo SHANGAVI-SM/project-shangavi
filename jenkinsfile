@@ -19,18 +19,18 @@ pipeline {
         }
 
         stage('Build and Push Dev Docker Image') {
+            when {
+                    changeset 'changeset**'
+            }
             steps {
-                when {
-                changeset 'changeset**'
-                }
                 script {
-                    sh "chmod +x -R ${env.WORKSPACE}"
-                    sh './build.sh'
-                    withCredentials([usernamePassword(credentialsId: 'docker', usernameVariable: 'DOCKER_HUB_USERNAME', passwordVariable: 'DOCKER_HUB_PASSWORD')]) {
-                        sh "docker login -u $DOCKER_HUB_USERNAME -p $DOCKER_HUB_PASSWORD"
-                        sh "docker tag ${dockerImageName}:${dockerImageTag} ${dockerHubRegistry}/${devdockerHubRepository}:${dockerImageTag}"
-                        sh "docker push ${dockerHubRegistry}/${devdockerHubRepository}:${dockerImageTag}"
-                    }
+                        sh "chmod +x -R ${env.WORKSPACE}"
+                        sh './build.sh'
+                        withCredentials([usernamePassword(credentialsId: 'docker', usernameVariable: 'DOCKER_HUB_USERNAME', passwordVariable: 'DOCKER_HUB_PASSWORD')]) {
+                            sh "docker login -u $DOCKER_HUB_USERNAME -p $DOCKER_HUB_PASSWORD"
+                            sh "docker tag ${dockerImageName}:${dockerImageTag} ${dockerHubRegistry}/${devdockerHubRepository}:${dockerImageTag}"
+                            sh "docker push ${dockerHubRegistry}/${devdockerHubRepository}:${dockerImageTag}"
+                        }
                 }
             }
         }
