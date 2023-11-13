@@ -9,7 +9,7 @@ export AWS_DEFAULT_REGION="region"
 DOCKER_IMAGE="capstoneproject:latest"
 EC2_INSTANCE_IP="15.206.94.151"
 EC2_INSTANCE_USER="ubuntu"
-PRIVATE_KEY_PATH="/var/lib/jenkins/.ssh/id_ed25519"  
+PRIVATE_KEY_PATH="/c/Users/koushalya/Downloads/keyforall.pem"  
 
 # Connect to the EC2 instance
 echo "Connecting to EC2 instance..."
