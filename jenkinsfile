@@ -58,11 +58,11 @@ pipeline {
                     // sh "docker pull ${dockerHubRegistry}/${devdockerHubRepository}:${dockerImageTag}"
                     sh "chmod +x -R ${env.WORKSPACE}"
                     sh './deploysh.sh'
-                    }
                 }
             }
         }
     }
 }
+
 
 
