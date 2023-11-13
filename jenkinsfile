@@ -40,6 +40,8 @@ pipeline {
                     checkout([$class: 'GitSCM', branches: [[name: '*/master']], doGenerateSubmoduleConfigurations: false, extensions: [], userRemoteConfigs: [[url: MASTER_REPO_URL]]])
                     sh "chmod +x -R ${env.WORKSPACE}"
                     sh './build.sh'
+                    withCredentials([usernamePassword(credentialsId: 'docker', usernameVariable: 'DOCKER_HUB_USERNAME', passwordVariable: 'DOCKER_HUB_PASSWORD')]) {
+                    sh "docker login -u $DOCKER_HUB_USERNAME -p $DOCKER_HUB_PASSWORD"
                     sh "docker tag ${dockerImageName}:${dockerImageTag} ${dockerHubRegistry}/${prodDockerHubRepository}:${dockerImageTag}"
                     sh "docker push ${dockerHubRegistry}/${prodDockerHubRepository}:${dockerImageTag}"
                 }
@@ -48,9 +50,10 @@ pipeline {
         stage('Deploy the application') {
             steps {
                 script {  
-                    
+                    // sh "docker pull ${dockerHubRegistry}/${devdockerHubRepository}:${dockerImageTag}"
                     sh "chmod +x -R ${env.WORKSPACE}"
-                    sh './deploy3.sh'
+                    sh './deploysh.sh'
+                    }
                 }
             }
         }
