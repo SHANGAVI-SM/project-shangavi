@@ -56,13 +56,16 @@ pipeline {
             steps {
                 script {  
                     // sh "docker pull ${dockerHubRegistry}/${devdockerHubRepository}:${dockerImageTag}"
-                    sh "chmod +x -R ${env.WORKSPACE}"
-                    sh './deploysh.sh'
+                    //sh "chmod +x -R ${env.WORKSPACE}"
+                    // sh './deploysh.sh'
+                    // Load SSH private key using the credential ID
+                    sshagent(credentials: ['appln-server-ssh-pk']) {
+                        // SSH commands to connect to EC2
+                        sh "ssh -o StrictHostKeyChecking=no -i /c/Users/koushalya/Downloads/keyforall.pem ubuntu@15.206.94.151 "
+                        echo "successfully connected"
+                    }
                 }
             }
         }
     }
 }
-
-
-
