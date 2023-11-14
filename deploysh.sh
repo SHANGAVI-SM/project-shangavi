@@ -7,7 +7,7 @@ export AWS_DEFAULT_REGION="region"
 
 # Set your Docker image details
 DOCKER_IMAGE="capstoneproject:latest"
-EC2_INSTANCE_IP="15.206.94.151"
+EC2_INSTANCE_IP="65.1.2.242"
 EC2_INSTANCE_USER="ubuntu"
 PRIVATE_KEY_PATH="/c/Users/koushalya/Downloads/keyforall.pem"  
 
