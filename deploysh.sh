@@ -7,13 +7,13 @@ export AWS_DEFAULT_REGION="region"
 
 # Set your Docker image details
 DOCKER_IMAGE="capstoneproject:latest"
-EC2_INSTANCE_IP="65.1.2.242"
+EC2_INSTANCE_IP="15.206.94.151"
 EC2_INSTANCE_USER="ubuntu"
 PRIVATE_KEY_PATH="/c/Users/koushalya/Downloads/keyforall.pem"  
 
 # Connect to the EC2 instance
 echo "Connecting to EC2 instance..."
-ssh -o "StrictHostKeyChecking no" $EC2_INSTANCE_USER@$EC2_INSTANCE_IP /bin/bash<< EOF
+ssh -v -i "$PRIVATE_KEY_PATH" -o "IdentitiesOnly=yes" $EC2_INSTANCE_USER@$EC2_INSTANCE_IP << EOF
 
 #  Pull the latest Docker image
 echo "Pulling the latest Docker image..."
