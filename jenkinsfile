@@ -34,6 +34,7 @@ pipeline {
                 script {
                         sh "chmod +x -R ${env.WORKSPACE}"
                         sh './build.sh'
+                        echo "image built success"
                         withCredentials([usernamePassword(credentialsId: 'docker', usernameVariable: 'DOCKER_HUB_USERNAME', passwordVariable: 'DOCKER_HUB_PASSWORD')]) {
                             sh "docker login -u $DOCKER_HUB_USERNAME -p $DOCKER_HUB_PASSWORD"
                             sh "docker tag ${dockerImageName}:${dockerImageTag} ${dockerHubRegistry}/${devdockerHubRepository}:${dockerImageTag}"
