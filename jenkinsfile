@@ -11,41 +11,41 @@ pipeline {
         dockerImageTag = 'latest'
     }
 
-
     stages {
         stage('Checkout Dev Repo') {
             agent {
                 label 'master'
             }
-                steps {
-                checkout([$class: 'GitSCM', branches: [[name: '*/dev']], doGenerateSubmoduleConfigurations: false, extensions: [], userRemoteConfigs: [[url: DEV_REPO_URL]]])
+            steps {
+                script {
+                    checkout([$class: 'GitSCM', branches: [[name: '*/dev']], doGenerateSubmoduleConfigurations: false, extensions: [], userRemoteConfigs: [[url: DEV_REPO_URL]]])
+                }
             }
         }
 
         stage('Build and Push to Dev Docker Image') {
-             agent {
+            agent {
                 label 'master'
             }
             when {
-                    changeset 'changeset**'
+                changeset 'changeset**'
             }
             steps {
-                
                 script {
-                        sh "chmod +x -R ${env.WORKSPACE}"
-                        sh './build.sh'
-                        echo "image built success"
-                        withCredentials([usernamePassword(credentialsId: 'docker', usernameVariable: 'DOCKER_HUB_USERNAME', passwordVariable: 'DOCKER_HUB_PASSWORD')]) {
-                            sh "docker login -u $DOCKER_HUB_USERNAME -p $DOCKER_HUB_PASSWORD"
-                            sh "docker tag ${dockerImageName}:${dockerImageTag} ${dockerHubRegistry}/${devdockerHubRepository}:${dockerImageTag}"
-                            sh "docker push ${dockerHubRegistry}/${devdockerHubRepository}:${dockerImageTag}"
-                        }
+                    sh "chmod +x -R ${env.WORKSPACE}"
+                    sh './build.sh'
+                    echo "image built successfully"
+                    withCredentials([usernamePassword(credentialsId: 'docker', usernameVariable: 'DOCKER_HUB_USERNAME', passwordVariable: 'DOCKER_HUB_PASSWORD')]) {
+                        sh "docker login -u $DOCKER_HUB_USERNAME -p $DOCKER_HUB_PASSWORD"
+                        sh "docker tag ${dockerImageName}:${dockerImageTag} ${dockerHubRegistry}/${devdockerHubRepository}:${dockerImageTag}"
+                        sh "docker push ${dockerHubRegistry}/${devdockerHubRepository}:${dockerImageTag}"
+                    }
                 }
             }
         }
-        
+
         stage('Build and Push to Prod Docker Image') {
-             agent {
+            agent {
                 label 'master'
             }
             when {
@@ -57,30 +57,31 @@ pipeline {
                     sh "chmod +x -R ${env.WORKSPACE}"
                     sh './build.sh'
                     withCredentials([usernamePassword(credentialsId: 'docker', usernameVariable: 'DOCKER_HUB_USERNAME', passwordVariable: 'DOCKER_HUB_PASSWORD')]) {
-                    sh "docker login -u $DOCKER_HUB_USERNAME -p $DOCKER_HUB_PASSWORD"
-                    sh "docker tag ${dockerImageName}:${dockerImageTag} ${dockerHubRegistry}/${prodDockerHubRepository}:${dockerImageTag}"
-                    sh "docker push ${dockerHubRegistry}/${prodDockerHubRepository}:${dockerImageTag}"
+                        sh "docker login -u $DOCKER_HUB_USERNAME -p $DOCKER_HUB_PASSWORD"
+                        sh "docker tag ${dockerImageName}:${dockerImageTag} ${dockerHubRegistry}/${prodDockerHubRepository}:${dockerImageTag}"
+                        sh "docker push ${dockerHubRegistry}/${prodDockerHubRepository}:${dockerImageTag}"
                     }
-                 }
+                }
             }
         }
+
         stage('Deploy the application') {
-             agent {
+            agent {
                 label 'slave'
             }
             steps {
-                script {  
+                script {
                     withCredentials([usernamePassword(credentialsId: 'docker', usernameVariable: 'DOCKER_HUB_USERNAME', passwordVariable: 'DOCKER_HUB_PASSWORD')]) {
-                    sh "docker login -u $DOCKER_HUB_USERNAME -p $DOCKER_HUB_PASSWORD"
-                    // sh "docker pull ${dockerHubRegistry}/${devdockerHubRepository}:${dockerImageTag}"
-                    sh "chmod +x -R ${env.WORKSPACE}"
-                    sh './deploysh.sh'
-                    // Load SSH private key using the credential ID
-                    //sshagent(credentials: ['appln-server-ssh-pk']) {
-                        // SSH commands to connect to EC2
-                       // sh "ssh -o StrictHostKeyChecking=no -i /c/Users/koushalya/Downloads/keyforall.pem ubuntu@65.1.2.242"
-                        //echo "successfully connected"
-                        //sh "docker run -d -p 80:80 ${dockerImageName}:${dockerImageTag}"
+                        sh "docker login -u $DOCKER_HUB_USERNAME -p $DOCKER_HUB_PASSWORD"
+                        sh "chmod +x -R ${env.WORKSPACE}"
+                        sh './deploysh.sh'
+                        // Load SSH private key using the credential ID
+                        // sshagent(credentials: ['appln-server-ssh-pk']) {
+                        //     SSH commands to connect to EC2
+                        //     sh "ssh -o StrictHostKeyChecking=no -i /c/Users/koushalya/Downloads/keyforall.pem ubuntu@65.1.2.242"
+                        //     echo "successfully connected"
+                        //     sh "docker run -d -p 80:80 ${dockerImageName}:${dockerImageTag}"
+                        // }
                     }
                 }
             }
