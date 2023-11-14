@@ -13,7 +13,7 @@ PRIVATE_KEY_PATH="/c/Users/koushalya/Downloads/keyforall.pem"
 
 # Connect to the EC2 instance
 echo "Connecting to EC2 instance..."
-ssh root@EC2_INSTANCE_IP -p 12345 << EOF
+sshpass -p '12345' ssh root@EC2_INSTANCE_IP  << EOF
 
 #  Pull the latest Docker image
 echo "Pulling the latest Docker image..."
