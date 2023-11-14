@@ -3,20 +3,47 @@ pipeline {
 
     stages {
         stage('Checkout') {
+            agent { 
+                label 'master'
+            }
             steps {
-               git 'https://github.com/SHANGAVI-SM/project-shangavi.git'
+               git branch: 'dev',
+                url: 'https://github.com/SHANGAVI-SM/project-shangavi.git'
             }
         }
 
         stage('Build and Push Docker Image') {
+            agent { 
+                label 'master'
+            }
             steps {
                 // Grant executable permissions to the build script
-                sh 'chmod +x deploysh.sh'
+                sh 'chmod +x build.sh'
 
                 // Build the Docker image using the build script
-                sh './deploysh.sh'
+                sh './build.sh'
 
-              
+               withCredentials([usernamePassword(credentialsId: 'docker', usernameVariable: 'DOCKER_HUB_USERNAME', passwordVariable: 'DOCKER_HUB_PASSWORD')]) {
+                        sh "docker login -u $DOCKER_HUB_USERNAME -p $DOCKER_HUB_PASSWORD"
+
+                        sh 'docker tag capstone-image:latest $DOCKER_HUB_USERNAME/dev:latest '
+                        sh 'docker push $DOCKER_HUB_USERNAME/dev:latest'
+                
+                }
+            }
+        }
+
+        stage('deploy the application to server') {
+            agent { 
+                label 'slave'
+            }
+            steps {
+                // Grant executable permissions to the build script
+                sh 'chmod +x deploy.sh'
+
+                // Build the Docker image using the build script
+                sh './deploy.sh'
+                
             }
         }
     }
