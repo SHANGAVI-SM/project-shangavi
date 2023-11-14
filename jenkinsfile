@@ -11,6 +11,7 @@ pipeline {
         dockerImageTag = 'latest'
     }
 
+
     stages {
         stage('Checkout Dev Repo') {
             agent {
@@ -21,7 +22,7 @@ pipeline {
             }
         }
 
-        stage('Build and Push Dev Docker Image') {
+        stage('Build and Push to Dev Docker Image') {
              agent {
                 label 'master'
             }
@@ -42,7 +43,7 @@ pipeline {
             }
         }
         
-        stage('Build and Push Prod Docker Image') {
+        stage('Build and Push to Prod Docker Image') {
              agent {
                 label 'master'
             }
