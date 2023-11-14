@@ -13,16 +13,23 @@ pipeline {
 
     stages {
         stage('Checkout Dev Repo') {
+            agent {
+                label 'master'
+            }
                 steps {
                 checkout([$class: 'GitSCM', branches: [[name: '*/dev']], doGenerateSubmoduleConfigurations: false, extensions: [], userRemoteConfigs: [[url: DEV_REPO_URL]]])
             }
         }
 
         stage('Build and Push Dev Docker Image') {
+             agent {
+                label 'master'
+            }
             when {
                     changeset 'changeset**'
             }
             steps {
+                
                 script {
                         sh "chmod +x -R ${env.WORKSPACE}"
                         sh './build.sh'
@@ -36,6 +43,9 @@ pipeline {
         }
         
         stage('Build and Push Prod Docker Image') {
+             agent {
+                label 'master'
+            }
             when {
                 changeset 'refs/heads/dev:refs/heads/master'
             }
@@ -53,17 +63,22 @@ pipeline {
             }
         }
         stage('Deploy the application') {
+             agent {
+                label 'slave'
+            }
             steps {
                 script {  
+                    withCredentials([usernamePassword(credentialsId: 'docker', usernameVariable: 'DOCKER_HUB_USERNAME', passwordVariable: 'DOCKER_HUB_PASSWORD')]) {
+                    sh "docker login -u $DOCKER_HUB_USERNAME -p $DOCKER_HUB_PASSWORD"
                     // sh "docker pull ${dockerHubRegistry}/${devdockerHubRepository}:${dockerImageTag}"
-                    //sh "chmod +x -R ${env.WORKSPACE}"
-                    // sh './deploysh.sh'
+                    sh "chmod +x -R ${env.WORKSPACE}"
+                    sh './deploysh.sh'
                     // Load SSH private key using the credential ID
-                    sshagent(credentials: ['appln-server-ssh-pk']) {
+                    //sshagent(credentials: ['appln-server-ssh-pk']) {
                         // SSH commands to connect to EC2
-                        sh "ssh -o StrictHostKeyChecking=no -i /c/Users/koushalya/Downloads/keyforall.pem ubuntu@65.1.2.242"
-                        echo "successfully connected"
-                        sh "docker run -d -p 80:80 ${dockerImageName}:${dockerImageTag}"
+                       // sh "ssh -o StrictHostKeyChecking=no -i /c/Users/koushalya/Downloads/keyforall.pem ubuntu@65.1.2.242"
+                        //echo "successfully connected"
+                        //sh "docker run -d -p 80:80 ${dockerImageName}:${dockerImageTag}"
                     }
                 }
             }

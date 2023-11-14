@@ -7,13 +7,6 @@ export AWS_DEFAULT_REGION="region"
 
 # Set your Docker image details
 DOCKER_IMAGE="capstoneproject:latest"
-EC2_INSTANCE_IP="65.1.2.242"
-EC2_INSTANCE_USER="ubuntu"
-PRIVATE_KEY_PATH="/c/Users/koushalya/Downloads/keyforall.pem"  
-
-# Connect to the EC2 instance
-echo "Connecting to EC2 instance..."
-sshpass -p '12345' ssh root@EC2_INSTANCE_IP  << EOF
 
 #  Pull the latest Docker image
 echo "Pulling the latest Docker image..."
@@ -26,7 +19,5 @@ docker stop shangavi && docker rm shangavi
 # Run the new container
 echo "Starting the new Docker container..."
 docker run -d --name shangavi -p 80:80 $DOCKER_IMAGE
-
-EOF
 
 echo "Deployment complete!"
