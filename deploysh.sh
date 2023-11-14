@@ -1,23 +1,33 @@
 #!/bin/bash
 
-# Set your AWS credentials and region
-export AWS_ACCESS_KEY_ID="aws_access_key_id"
-export AWS_SECRET_ACCESS_KEY="aws_secret_access_key"
-export AWS_DEFAULT_REGION="region"
+# Check the Git branch
+if [[ $GIT_BRANCH == "origin/dev" ]]; then
+    # Build your project
+    ./build.sh
 
-# Set your Docker image details
-DOCKER_IMAGE="capstoneproject:latest"
+    # Log in to Docker Hub (replace with your actual Docker Hub credentials)
+    docker login -u shangavism -p Darshiv@25
 
-#  Pull the latest Docker image
-echo "Pulling the latest Docker image..."
-docker pull $DOCKER_IMAGE
+  
+    # Tag the image
+    docker tag capstone-image shangavism/dev
 
-# Stop and remove the existing container (if any)
-echo "Stopping and removing existing container..."
-docker stop shangavi && docker rm shangavi
+    # Push the image to the Dev Docker Hub repository
+    docker push shangavism/dev
 
-# Run the new container
-echo "Starting the new Docker container..."
-docker run -d --name shangavi -p 80:80 $DOCKER_IMAGE
+elif [[ $GIT_BRANCH == "origin/master" ]]; then
+    # Build your project
+    ./build.sh
 
-echo "Deployment complete!"
+    # Log in to Docker Hub (replace with your actual Docker Hub credentials)
+    docker login -u shangavism -p Darshiv@25
+
+   
+    # Tag the image
+    docker tag capstone-image shangavism/prod 
+
+    # Push the image to the Prod Docker Hub repository
+    docker push shangavism/prod 
+else
+    echo "Deployment error"
+fi

@@ -1,89 +1,22 @@
 pipeline {
     agent any
 
-    environment {
-        DEV_REPO_URL = 'https://github.com/SHANGAVI-SM/project-shangavi.git'
-        MASTER_REPO_URL = 'https://github.com/SHANGAVI-SM/project-shangavi.git'
-        dockerHubRegistry = 'docker.io'
-        devdockerHubRepository = 'shangavism/dev'
-        prodDockerHubRepository = 'shangavism/prod'
-        dockerImageName = 'capstone-image'
-        dockerImageTag = 'latest'
-    }
-
     stages {
-        stage('Checkout Dev Repo') {
-            agent {
-                label 'master'
-            }
+        stage('Checkout') {
             steps {
-                script {
-                    checkout([$class: 'GitSCM', branches: [[name: '*/dev']], doGenerateSubmoduleConfigurations: false, extensions: [], userRemoteConfigs: [[url: DEV_REPO_URL]]])
-                }
+               git 'https://github.com/SHANGAVI-SM/project-shangavi.git'
             }
         }
 
-        stage('Build and Push to Dev Docker Image') {
-            agent {
-                label 'master'
-            }
-            when {
-                changeset 'changeset**'
-            }
+        stage('Build and Push Docker Image') {
             steps {
-                script {
-                    sh "chmod +x -R ${env.WORKSPACE}"
-                    sh './build.sh'
-                    echo "image built successfully"
-                    withCredentials([usernamePassword(credentialsId: 'docker', usernameVariable: 'DOCKER_HUB_USERNAME', passwordVariable: 'DOCKER_HUB_PASSWORD')]) {
-                        sh "docker login -u $DOCKER_HUB_USERNAME -p $DOCKER_HUB_PASSWORD"
-                        sh "docker tag ${dockerImageName}:${dockerImageTag} ${dockerHubRegistry}/${devdockerHubRepository}:${dockerImageTag}"
-                        sh "docker push ${dockerHubRegistry}/${devdockerHubRepository}:${dockerImageTag}"
-                    }
-                }
-            }
-        }
+                // Grant executable permissions to the build script
+                sh 'chmod +x deploy.sh'
 
-        stage('Build and Push to Prod Docker Image') {
-            agent {
-                label 'master'
-            }
-            when {
-                changeset 'refs/heads/dev:refs/heads/master'
-            }
-            steps {
-                script {
-                    checkout([$class: 'GitSCM', branches: [[name: '*/master']], doGenerateSubmoduleConfigurations: false, extensions: [], userRemoteConfigs: [[url: MASTER_REPO_URL]]])
-                    sh "chmod +x -R ${env.WORKSPACE}"
-                    sh './build.sh'
-                    withCredentials([usernamePassword(credentialsId: 'docker', usernameVariable: 'DOCKER_HUB_USERNAME', passwordVariable: 'DOCKER_HUB_PASSWORD')]) {
-                        sh "docker login -u $DOCKER_HUB_USERNAME -p $DOCKER_HUB_PASSWORD"
-                        sh "docker tag ${dockerImageName}:${dockerImageTag} ${dockerHubRegistry}/${prodDockerHubRepository}:${dockerImageTag}"
-                        sh "docker push ${dockerHubRegistry}/${prodDockerHubRepository}:${dockerImageTag}"
-                    }
-                }
-            }
-        }
+                // Build the Docker image using the build script
+                sh './deploy.sh'
 
-        stage('Deploy the application') {
-            agent {
-                label 'slave'
-            }
-            steps {
-                script {
-                    withCredentials([usernamePassword(credentialsId: 'docker', usernameVariable: 'DOCKER_HUB_USERNAME', passwordVariable: 'DOCKER_HUB_PASSWORD')]) {
-                        sh "docker login -u $DOCKER_HUB_USERNAME -p $DOCKER_HUB_PASSWORD"
-                        sh "chmod +x -R ${env.WORKSPACE}"
-                        sh './deploysh.sh'
-                        // Load SSH private key using the credential ID
-                        // sshagent(credentials: ['appln-server-ssh-pk']) {
-                        //     SSH commands to connect to EC2
-                        //     sh "ssh -o StrictHostKeyChecking=no -i /c/Users/koushalya/Downloads/keyforall.pem ubuntu@65.1.2.242"
-                        //     echo "successfully connected"
-                        //     sh "docker run -d -p 80:80 ${dockerImageName}:${dockerImageTag}"
-                        // }
-                    }
-                }
+              
             }
         }
     }
