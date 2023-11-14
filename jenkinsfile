@@ -3,7 +3,7 @@ pipeline {
 
     environment {
         DEV_REPO_URL = 'https://github.com/SHANGAVI-SM/project-shangavi.git'
-        MASTER_REPO_URL = 'https://github.com/rvsp/reactjs-demo.git'
+        MASTER_REPO_URL = 'https://github.com/SHANGAVI-SM/project-shangavi.git'
         dockerHubRegistry = 'docker.io'
         devdockerHubRepository = 'shangavism/dev'
         prodDockerHubRepository = 'shangavism/prod'
