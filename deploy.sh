@@ -1,17 +1,15 @@
 #!/bin/bash
 
-# Print the environment variables for debugging
-echo "Environment variables:"
-env
+# Print debug information
+echo "Branch: $GIT_BRANCH"
+echo "Commit: $GIT_COMMIT"
 
-BRANCH_NAME=$(git rev-parse --abbrev-ref HEAD)
+# Extract branch name from GIT_BRANCH
+BRANCH_NAME=$(echo "$GIT_BRANCH" | awk -F'/' '{print $NF}')
 export BRANCH_NAME
 
 # Docker login
 docker login -u shangavism -p Darshiv@25
-
-# Debugging: Print the value of BRANCH_NAME
-
 
 # Check the Jenkins environment variable for Git branch
 if [[ $BRANCH_NAME == "dev" ]]; then
@@ -25,6 +23,3 @@ elif [[ $BRANCH_NAME == "master" ]]; then
 else
     echo "Deployment error: Unknown branch"
 fi
-
-
-
