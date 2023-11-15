@@ -14,11 +14,11 @@ docker login -u shangavism -p Darshiv@25
 # Check the Jenkins environment variable for Git branch
 if [[ $BRANCH_NAME == "dev" ]]; then
     # Build and start your project in dev mode
-    docker-compose -f docker-compose-dev.yml up -d
+    docker-compose -f docker-compose-dev.yaml up -d
 
 elif [[ $BRANCH_NAME == "master" ]]; then
     # Build and start your project in prod mode
-    docker-compose -f docker-compose-prod.yml up -d
+    docker-compose -f docker-compose-prod.yaml up -d
 
 else
     echo "Deployment error: Unknown branch"
