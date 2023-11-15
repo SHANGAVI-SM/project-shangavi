@@ -1,33 +1,30 @@
 #!/bin/bash
 
-# Check the Git branch
-if [[ $GIT_BRANCH == "origin/dev" ]]; then
-    # Build your project
-    ./build.sh
+# Print the environment variables for debugging
+echo "Environment variables:"
+env
 
-    # Log in to Docker Hub (replace with your actual Docker Hub credentials)
-    docker login -u shangavism -p Darshiv@25
+BRANCH_NAME=$(git rev-parse --abbrev-ref HEAD)
+export BRANCH_NAME
 
-  
-    # Tag the image
-    docker tag capstone-image shangavism/dev
+# Docker login
+docker login -u shangavism -p Darshiv@25
 
-    # Push the image to the Dev Docker Hub repository
-    docker push shangavism/dev
+# Debugging: Print the value of BRANCH_NAME
 
-elif [[ $GIT_BRANCH == "origin/master" ]]; then
-    # Build your project
-    ./build.sh
 
-    # Log in to Docker Hub (replace with your actual Docker Hub credentials)
-    docker login -u shangavism -p Darshiv@25
+# Check the Jenkins environment variable for Git branch
+if [[ $BRANCH_NAME == "dev" ]]; then
+    # Build and start your project in dev mode
+    docker-compose -f docker-compose-dev.yml up -d
 
-   
-    # Tag the image
-    docker tag capstone-image shangavism/prod 
+elif [[ $BRANCH_NAME == "master" ]]; then
+    # Build and start your project in prod mode
+    docker-compose -f docker-compose-prod.yml up -d
 
-    # Push the image to the Prod Docker Hub repository
-    docker push shangavism/prod 
 else
-    echo "Deployment error"
+    echo "Deployment error: Unknown branch"
 fi
+
+
+

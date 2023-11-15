@@ -1,24 +1,31 @@
-# Use an official Node.js runtime as the base image
-FROM node:14-alpine
+# Selecting the base image
+FROM node:14-alpine As build
 
-# Set the working directory in the container
+# Set the working directory
 WORKDIR /app
 
-# Copy the package.json to the container
+# Copy package.json and package-lock.json to the working directory
 COPY package.json .
+COPY package-lock.json .
 
-# Install project dependencies using Yarn
-RUN yarn install
+# Install dependencies
+RUN npm install
 
-# Copy the entire application code to the container
+# Copy the rest of the application code
 COPY . .
 
-# Build the React application (you can customize this as needed)
-RUN yarn build
+# Build the React application
+RUN npm run build
 
-# Expose a port, if needed (for development server or custom server)
+
+# Stage 2: Serve the application using Nginx
+FROM nginx:alpine
+
+# Copy the built files from the previous stage
+COPY --from=build /app/build /usr/share/nginx/html
+
+# Expose port 80 (the default HTTP port)
 EXPOSE 80
 
-# Start the application (this is just an example, adjust as needed)
-CMD ["yarn", "start"]
-
+# Start Nginx and keep it running in the foreground
+CMD ["nginx", "-g", "daemon off;"]

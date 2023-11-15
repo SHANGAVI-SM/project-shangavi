@@ -1,0 +1,41 @@
+pipeline {
+    agent any 
+    
+    stages {
+        stage ('cloining code from GitHub') {
+            steps {
+                git branch: 'dev', 
+                url: 'https://github.com/SHANGAVI-SM/project-shangavi.git'
+            }
+        }
+
+        stage ('building & pushing to dockerhub') {
+            steps {
+                sh 'chmod 777 build.sh'
+                sh './build.sh'
+                withCredentials([usernamePassword(credentialsId: 'docker', usernameVariable: 'DOCKER_HUB_USERNAME', passwordVariable: 'DOCKER_HUB_PASSWORD')]) {
+                        sh "docker login -u $DOCKER_HUB_USERNAME -p $DOCKER_HUB_PASSWORD"
+                        sh "docker tag capstone-image:latest $DOCKER_HUB_USERNAME/dev-shangavi"
+                        sh "docker push $DOCKER_HUB_USERNAME/dev-shangavi"
+            }
+        }
+    }
+    
+    stage ('code from GitHub') {
+        agent { label 'slave'}
+        steps {
+            git branch: 'dev', 
+            url: 'https://github.com/SHANGAVI-SM/project-shangavi.git'
+        }
+    }
+    
+    stage ('deploying to application server') {
+        agent { label 'slave'}
+        steps {
+            //sh 'docker rm -f $(docker ps -aq)'
+            sh 'chmod 777 deploy.sh'
+            sh './deploy.sh'
+            }
+        }
+    }
+}
