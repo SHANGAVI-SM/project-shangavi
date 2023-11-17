@@ -1,6 +1,6 @@
 version: '3'
 services:
   react-capstone:
-    image: "shangavism/dev-shangavi"  # Use the correct image name
+    image: "shangavism/dev-shangavi"  
     ports:
       - "80:80"
