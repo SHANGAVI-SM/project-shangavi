@@ -32,7 +32,7 @@ pipeline {
     stage ('deploy to application server') {
         agent { label 'slave'}
         steps {
-            sh 'docker rm -f $(docker ps -aq)'
+            //sh 'docker rm -f $(docker ps -aq)'
             sh 'chmod 777 deploy.sh'
             sh './deploy.sh'
             }
