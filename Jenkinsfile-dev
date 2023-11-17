@@ -29,7 +29,7 @@ pipeline {
         }
     }
     
-    stage ('deploying to application server') {
+    stage ('deploy to application server') {
         agent { label 'slave'}
         steps {
             sh 'docker rm -f $(docker ps -aq)'
